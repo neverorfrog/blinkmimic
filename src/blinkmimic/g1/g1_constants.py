@@ -151,6 +151,7 @@ def load_lafan1_csv(path: str) -> MotionArrays:
 
 SPEC = RobotSpec(
     name="g1",
+    foot_bodies=("left_ankle_roll_link", "right_ankle_roll_link"),
     mjcf_path=MJCF_PATH,
     joint_names=tuple(G1_JOINT_NAMES),
     tracked_bodies=tuple(TRACKED_BODIES),

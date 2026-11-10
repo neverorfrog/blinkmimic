@@ -46,6 +46,9 @@ class RobotSpec:
     """Simulator randomization (default: the paper's G1 setup)."""
     sensing: SensingCfg = field(default_factory=SensingCfg)
     """How the policy observation is sensed (default: true state plus Table A.1 noise)."""
+    foot_bodies: tuple[str, ...] = ()
+    """Left/right tracked foot bodies for contact matching."""
+    ccd_iterations: int = 35
     njmax: int = 500
     nconmax: int = 128
     """MuJoCo-Warp constraint / contact capacity per world."""

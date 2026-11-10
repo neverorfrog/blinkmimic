@@ -80,7 +80,7 @@ def make_sim(robot: RobotSpec) -> SimulationCfg:
             iterations=100,
             ls_iterations=50,
             tolerance=1e-6,
-            ccd_iterations=35,
+            ccd_iterations=robot.ccd_iterations,
         ),
     )
 

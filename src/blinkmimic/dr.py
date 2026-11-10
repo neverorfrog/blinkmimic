@@ -123,7 +123,7 @@ class XiLayout:
         self.scale = torch.tensor(scales, device=device)
 
     def normalize(self, xi: torch.Tensor) -> torch.Tensor:
-        return (xi - self.center) / self.scale
+        return (xi - self.center) / self.scale.clamp(min=1e-6)
 
     def get(self, xi: torch.Tensor, name: str) -> torch.Tensor:
         return xi[..., self.slices[name]]
