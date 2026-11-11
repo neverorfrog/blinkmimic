@@ -146,7 +146,7 @@ from blinkmimic.networks import Critic, Policy, WorldModel, check_pruned, policy
 from blinkmimic.mirror import Mirror
 from blinkmimic.objective import actor_objective
 from blinkmimic.mdp import flatten_state
-from blinkmimic.robot import get_robot
+from blinkmimic.robot import get_robot, configure_runtime
 from blinkmimic.sensing import ObsPipeline
 
 torch.backends.cuda.matmul.allow_tf32 = True
@@ -155,9 +155,11 @@ torch.manual_seed(args.seed)
 networks.AMP_DTYPE = torch.bfloat16 if args.amp == "bf16" else None
 dev = "cuda:0"
 os.makedirs(args.log_dir, exist_ok=True)
-json.dump(vars(args), open(os.path.join(args.log_dir, "args.json"), "w"), indent=2)
-
 robot = get_robot(args.robot)
+disabled = configure_runtime(args, robot)
+if disabled:
+    print(f"{robot.name}: delayed actuators require eager simulator collection/probes and normal scene resets; disabled {disabled}", flush=True)
+json.dump(vars(args), open(os.path.join(args.log_dir, "args.json"), "w"), indent=2)
 J = robot.num_joints
 kin = Kinematics(robot, dev)
 motion = MotionLib.from_dir(args.motion_dir or robot.motion_dir, robot, kin, dev)

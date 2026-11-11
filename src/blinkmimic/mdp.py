@@ -148,9 +148,9 @@ class MDP:
         r = (r_track + c.w_action_rate * r_rate + c.w_joint_limit * r_lim) * CONTROL_DT
         if w_contact > 0:
             fz, rz = bp[..., self.feet, 2], m.body_p[f][..., self.feet, 2]
-            c_sim = torch.sigmoid((CONTACT_Z - fz) / 0.005)
+            c_sim = torch.sigmoid((self.kin.contact_height - fz) / 0.005)
             rc = getattr(m, "ref_contact", None)  # MotionLib.set_ref_contact (--ref_contact_fix), else the fixed 4.5 cm
-            c_ref = rc[f] if rc is not None else (rz < CONTACT_Z).float()
+            c_ref = rc[f] if rc is not None else (rz < self.kin.contact_height).float()
             slip = (bv[..., self.feet, :2] ** 2).sum(-1)
             r_contact = (1 - (c_sim - c_ref) ** 2) + c_ref * torch.exp(-slip / 0.3**2)
             r = r + w_contact * r_contact.mean(-1) * CONTROL_DT

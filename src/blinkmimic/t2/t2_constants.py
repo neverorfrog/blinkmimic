@@ -51,6 +51,7 @@ SPEC = RobotSpec(
     joint_names=tuple(JOINT_NAMES),
     tracked_bodies=TRACKED_BODIES,
     foot_bodies=FOOT_BODY_NAMES,
+    contact_height=0.0375,  # neutral sole bottom is 32.5 mm below the ankle, plus 5 mm clearance
     default_joint_pos=HOME_QPOS,
     action_scale=action_scale(ACTUATOR_PARAMETERS),
     com_body=BASE_BODY_NAME,

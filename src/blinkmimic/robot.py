@@ -48,6 +48,8 @@ class RobotSpec:
     """How the policy observation is sensed (default: true state plus Table A.1 noise)."""
     foot_bodies: tuple[str, ...] = ()
     """Left/right tracked foot bodies for contact matching."""
+    contact_height: float = 0.045
+    """Ankle-link world height used by the smooth contact reward, including clearance margin."""
     ccd_iterations: int = 35
     njmax: int = 500
     nconmax: int = 128
@@ -80,3 +82,14 @@ class RobotSpec:
 def get_robot(name: str) -> RobotSpec:
     """Load ``blinkmimic.<name>.<name>_constants.SPEC``."""
     return importlib.import_module(f"blinkmimic.{name}.{name}_constants").SPEC
+
+
+def configure_runtime(args, robot: RobotSpec) -> list[str]:
+    """Simulator graph shortcuts cannot advance/reset Python-managed actuator delay history."""
+    disabled = []
+    if robot.has_action_delay:
+        for name in ("collect_graph", "reset_masked", "eprobe_graph", "eprobe_async"):
+            if getattr(args, name, False):
+                disabled.append(name)
+                setattr(args, name, 0 if name == "eprobe_async" else False)
+    return disabled

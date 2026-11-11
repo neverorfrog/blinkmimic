@@ -273,6 +273,7 @@ class TrackingSim:
         same values as reset() would give them for the same frames and random draws (random draws are made for all
         worlds, so the random stream differs from reset()). Only the configuration used here is supported: no pushes,
         no sensing state, no per-episode mjlab randomization terms, no actuator delays."""
+        assert not self.spec.has_action_delay, "reset_masked cannot reset actuator delay buffers; use reset()"
         assert not self.eval_mode and not self.pipe.stateful and not self.push_enabled
         assert not self.randomizer._terms and self.spec.dr.solref_geoms is None and self.spec.dr.com_mass_range is None
         N, dev, m, c = self.N, self.device, self.motion, self.spec.dr
