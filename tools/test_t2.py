@@ -1,5 +1,11 @@
-"""CPU checks for the Colosseum T2 adapter; run with Colosseum's Pixi environment."""
+"""CPU checks for the Colosseum T1/T2 adapters; run with Colosseum's Pixi environment.
 
+    python tools/test_t2.py [t1|t2]
+"""
+
+import importlib
+import re
+import sys
 import tempfile
 from pathlib import Path
 
@@ -11,8 +17,19 @@ from blinkmimic.kinematics import Kinematics
 from blinkmimic.mirror import Mirror
 from blinkmimic.motion import MotionLib
 from blinkmimic.rotations import quat_to_mat
-from blinkmimic.t2.t2_constants import SPEC, load_npz
-from colosseum.robots.t2.constants import FLIP_SIGN_JOINT_NAMES, SYMMETRY_JOINT_NAMES
+from blinkmimic.robot import get_robot
+
+ROBOT = sys.argv[1] if len(sys.argv) > 1 else "t2"
+SPEC = get_robot(ROBOT)
+load_npz = SPEC.load_motion
+_constants = importlib.import_module(f"colosseum.robots.{ROBOT}.constants")
+FLIP_SIGN_JOINT_NAMES, SYMMETRY_JOINT_NAMES = _constants.FLIP_SIGN_JOINT_NAMES, _constants.SYMMETRY_JOINT_NAMES
+
+
+def body_partner(name: str) -> str:
+    """left_/right_, Left/Right and the T1 arm links AL*/AR* swapped."""
+    swap = {"left_": "right_", "right_": "left_", "Left": "Right", "Right": "Left", "AL": "AR", "AR": "AL"}
+    return re.sub(r"left_|right_|Left|Right|^AL|^AR", lambda m: swap[m.group(0)], name)
 
 
 def main():
@@ -47,7 +64,7 @@ def main():
                 errors[k] = max(errors[k], np.abs(a.numpy() - expected).max())
     assert max(errors) < 1e-4, errors
     mirrored = kin.forward(*mirror.state(S))
-    body_perm = [SPEC.tracked_bodies.index(n.replace("left_", "@").replace("right_", "left_").replace("@", "right_")) for n in SPEC.tracked_bodies]
+    body_perm = [SPEC.tracked_bodies.index(body_partner(n)) for n in SPEC.tracked_bodies]
     assert torch.allclose(mirrored[0], bp[:, body_perm] @ mirror.M, atol=1e-5)
     assert torch.allclose(mirrored[1], mirror.M @ bR[:, body_perm] @ mirror.M, atol=1e-5)
     clip = next(Path(SPEC.motion_dir).glob("*.npz"))

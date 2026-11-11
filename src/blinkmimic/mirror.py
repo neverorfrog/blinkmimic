@@ -19,9 +19,12 @@ class Mirror:
         names = list(robot.joint_names)
         perm, sign = [], []
         for n in names:
-            partner = n.replace("left_", "@").replace("right_", "left_").replace("@", "right_")
+            partner = robot.mirror_joints.get(n) or n.replace("left_", "@").replace("right_", "left_").replace("@", "right_")
             perm.append(names.index(partner))
-            sign.append(-1.0 if any(f"_{t}_" in n for t in _FLIP_TYPES) else 1.0)
+            if robot.flip_sign_joints is not None:
+                sign.append(-1.0 if n in robot.flip_sign_joints else 1.0)
+            else:
+                sign.append(-1.0 if any(f"_{t}_" in n for t in _FLIP_TYPES) else 1.0)
         self.perm = torch.tensor(perm, device=device)
         self.sign = torch.tensor(sign, device=device)
         self.M = torch.diag(torch.tensor([1.0, -1.0, 1.0], device=device))

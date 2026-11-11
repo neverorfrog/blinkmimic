@@ -50,6 +50,10 @@ class RobotSpec:
     """Left/right tracked foot bodies for contact matching."""
     contact_height: float = 0.045
     """Ankle-link world height used by the smooth contact reward, including clearance margin."""
+    mirror_joints: dict[str, str] = field(default_factory=dict)
+    """Joint -> left/right partner; empty: inferred from ``left_``/``right_`` names."""
+    flip_sign_joints: tuple[str, ...] | None = None
+    """Joints whose angle flips under the mirror; None: inferred from ``_roll_``/``_yaw_`` names."""
     ccd_iterations: int = 35
     njmax: int = 500
     nconmax: int = 128
